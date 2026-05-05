@@ -34,7 +34,8 @@ class VerseGridTheme extends ThemeExtension<VerseGridTheme> {
   final double defaultVerseNumberFontSize;
 
   static VerseGridTheme of(BuildContext context) {
-    return Theme.of(context).extension<VerseGridTheme>() ?? const VerseGridTheme();
+    return Theme.of(context).extension<VerseGridTheme>() ??
+        const VerseGridTheme();
   }
 
   @override

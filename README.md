@@ -45,6 +45,12 @@ import 'package:flutter_versegrid/flutter_versegrid.dart';
 
 Если задан `VerseRange.semanticsLabel`, каждый чип оборачивается в **`Semantics`** (`button: true`) для экранных дикторов.
 
+### `VerseNumberGrid<T>`
+
+Фиксированная сетка номеров стихов (по умолчанию **7 колонок**) — для legacy-поведения “одна ячейка на стих” (выбор текущего стиха, индикатор закладки).
+
+Визуал ячейки полностью задаётся через `cellBuilder`, а виджет берёт на себя только **геометрию** (квадратные ячейки, отступы, ограничение по рядам `maxRows` и опциональный внутренний скролл при переполнении).
+
 ---
 
 ## Модели и группировка
@@ -129,6 +135,69 @@ VerseRangeChipStrip<Sloka>(
     selected: selected,
     onSelected: (_) => onTap(),
   ),
+);
+```
+
+**Сетка номеров (fixed 7 columns):**
+
+```dart
+VerseNumberGrid<int>(
+  items: [
+    for (final i in List.generate(47, (i) => i + 1))
+      VerseNumberGridItem(
+        value: i,
+        label: '$i',
+        bookmarked: i == 3 || i == 18,
+        semanticsLabel: 'Глава 1, стих $i',
+      ),
+  ],
+  isSelected: (item) => item.value == 18,
+  onItemTap: (item) => debugPrint('tap ${item.value}'),
+  cellBuilder: (context, item, selected, size, onTap) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(size / 2),
+        child: Stack(
+          children: [
+            Center(
+              child: Container(
+                width: size,
+                height: size,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: selected ? Colors.red : Colors.grey.shade200,
+                ),
+                alignment: Alignment.center,
+                child: Text(
+                  item.label,
+                  style: TextStyle(
+                    fontWeight: FontWeight.w600,
+                    color: selected ? Colors.white : Colors.black87,
+                  ),
+                ),
+              ),
+            ),
+            if (item.bookmarked)
+              Positioned(
+                top: size * 0.12,
+                right: size * 0.12,
+                child: Container(
+                  width: size * 0.18,
+                  height: size * 0.18,
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.amber,
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  },
 );
 ```
 

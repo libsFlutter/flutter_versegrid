@@ -59,37 +59,46 @@ class VersePassage extends StatelessWidget {
     final vg = VerseGridTheme.of(context);
     final theme = Theme.of(context);
 
-    final basePrimary = primaryStyle ??
-        theme.textTheme.bodyLarge?.copyWith(
-              fontSize: vg.defaultOriginalFontSize,
-              fontWeight: FontWeight.w500,
-            ) ??
-        TextStyle(fontSize: vg.defaultOriginalFontSize);
+    final resolvedPrimary = (primaryStyle ?? theme.textTheme.bodyLarge)
+            ?.copyWith(fontWeight: FontWeight.w500) ??
+        const TextStyle();
 
-    final baseSecondary = secondaryStyle ??
-        theme.textTheme.bodyMedium?.copyWith(
-              fontSize: vg.defaultTranslationFontSize,
-              color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.74),
+    final resolvedSecondary =
+        (secondaryStyle ?? theme.textTheme.bodyMedium)?.copyWith(
+              color:
+                  theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.74),
             ) ??
-        TextStyle(fontSize: vg.defaultTranslationFontSize);
+            const TextStyle();
 
-    final baseVerseNumber = verseNumberStyle ??
-        theme.textTheme.labelMedium?.copyWith(
-              fontSize: vg.defaultVerseNumberFontSize,
-            ) ??
-        TextStyle(fontSize: vg.defaultVerseNumberFontSize);
+    final resolvedVerseNumber = (verseNumberStyle ?? theme.textTheme.labelMedium)
+            ?.copyWith() ??
+        const TextStyle();
 
-    final scaledPrimary = basePrimary.copyWith(
-      fontSize: (basePrimary.fontSize ?? vg.defaultOriginalFontSize) *
+    final defaultedPrimary = resolvedPrimary.copyWith(
+      fontSize: resolvedPrimary.fontSize ?? vg.defaultOriginalFontSize,
+    );
+    final defaultedSecondary = resolvedSecondary.copyWith(
+      fontSize:
+          resolvedSecondary.fontSize ?? vg.defaultTranslationFontSize,
+    );
+    final defaultedVerseNumber = resolvedVerseNumber.copyWith(
+      fontSize:
+          resolvedVerseNumber.fontSize ?? vg.defaultVerseNumberFontSize,
+    );
+
+    final scaledPrimary = defaultedPrimary.copyWith(
+      fontSize: (defaultedPrimary.fontSize ?? vg.defaultOriginalFontSize) *
           textScaleFactor,
     );
-    final scaledSecondary = baseSecondary.copyWith(
-      fontSize: (baseSecondary.fontSize ?? vg.defaultTranslationFontSize) *
-          textScaleFactor,
+    final scaledSecondary = defaultedSecondary.copyWith(
+      fontSize:
+          (defaultedSecondary.fontSize ?? vg.defaultTranslationFontSize) *
+              textScaleFactor,
     );
-    final scaledVerseNumber = baseVerseNumber.copyWith(
-      fontSize: (baseVerseNumber.fontSize ?? vg.defaultVerseNumberFontSize) *
-          textScaleFactor,
+    final scaledVerseNumber = defaultedVerseNumber.copyWith(
+      fontSize:
+          (defaultedVerseNumber.fontSize ?? vg.defaultVerseNumberFontSize) *
+              textScaleFactor,
     );
 
     final secondaryTrimmed = secondary?.trim();

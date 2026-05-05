@@ -87,6 +87,7 @@ class _GalleryPageState extends State<_GalleryPage> {
   );
 
   int _selectedVerseNumber = _demoVerses.first.number;
+  final Set<int> _bookmarkedVerseNumbers = {1, 3};
   bool _showRussianTranslation = true;
 
   _DemoVerse get _selectedVerse => _demoVerses.firstWhere(
@@ -161,6 +162,93 @@ class _GalleryPageState extends State<_GalleryPage> {
                 label: Text(range.label),
                 selected: selected,
                 onSelected: (_) => onTap(),
+              );
+            },
+          ),
+          const SizedBox(height: 16),
+          Text(
+            'VerseNumberGrid (legacy 7×N)',
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Фиксированная сетка номеров (7 колонок), выделение выбранного и индикатор закладки.',
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.65),
+            ),
+          ),
+          const SizedBox(height: 12),
+          VerseNumberGrid<int>(
+            items: [
+              for (final v in _demoVerses)
+                VerseNumberGridItem<int>(
+                  value: v.number,
+                  label: '${v.number}',
+                  bookmarked: _bookmarkedVerseNumbers.contains(v.number),
+                  semanticsLabel: 'Chapter 2, verse ${v.number}',
+                ),
+            ],
+            isSelected: (item) => item.value == _selectedVerseNumber,
+            onItemTap: (item) => setState(() {
+              _selectedVerseNumber = item.value;
+            }),
+            cellBuilder: (context, item, selected, size, onTap) {
+              return SizedBox(
+                width: size,
+                height: size,
+                child: Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: onTap,
+                    borderRadius: BorderRadius.circular(size / 2),
+                    child: Stack(
+                      children: [
+                        Center(
+                          child: Container(
+                            width: size,
+                            height: size,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: selected
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.surfaceContainerHighest,
+                              border: selected
+                                  ? null
+                                  : Border.all(
+                                      color: theme.colorScheme.outlineVariant,
+                                    ),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              item.label,
+                              style: theme.textTheme.labelLarge?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                color: selected
+                                    ? theme.colorScheme.onPrimary
+                                    : theme.colorScheme.onSurface,
+                              ),
+                            ),
+                          ),
+                        ),
+                        if (item.bookmarked)
+                          Positioned(
+                            top: size * 0.12,
+                            right: size * 0.12,
+                            child: Container(
+                              width: size * 0.2,
+                              height: size * 0.2,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: theme.colorScheme.tertiary,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                ),
               );
             },
           ),
