@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../models/verse_page.dart';
 import '../models/verse_page_block.dart';
+import '../theme/verse_page_theme.dart';
 import 'verse_passage.dart';
 
 typedef VerseCustomBlockBuilder = Widget Function(
@@ -17,6 +18,8 @@ class VersePageRenderer extends StatelessWidget {
     this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
     this.blockSpacing = 12,
     this.paragraphStyle,
+    this.paragraphStyleResolver,
+    this.pageNumberStyle,
     this.passageLayout = VersePassageLayout.columnStretch,
     this.highlightQuery,
     this.highlightStyle,
@@ -31,6 +34,9 @@ class VersePageRenderer extends StatelessWidget {
   final double blockSpacing;
 
   final TextStyle? paragraphStyle;
+  final VerseParagraphStyle? Function(BuildContext context, String styleKey)?
+      paragraphStyleResolver;
+  final TextStyle? pageNumberStyle;
   final VersePassageLayout passageLayout;
 
   final String? highlightQuery;
@@ -56,7 +62,7 @@ class VersePageRenderer extends StatelessWidget {
       children.add(_buildBlock(context, b));
     }
 
-    final content = Padding(
+    Widget content = Padding(
       padding: padding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -64,19 +70,82 @@ class VersePageRenderer extends StatelessWidget {
       ),
     );
 
+    final bg = page.background;
+    final pn = page.pageNumber;
+    if (bg != null || pn != null) {
+      content = Stack(
+        fit: StackFit.passthrough,
+        children: [
+          if (bg != null)
+            Positioned.fill(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  color: bg.color,
+                  image: bg.image == null
+                      ? null
+                      : DecorationImage(
+                          image: bg.image!,
+                          alignment: bg.alignment,
+                          fit: switch (bg.fit) {
+                            VersePageBackgroundFit.cover => BoxFit.cover,
+                            VersePageBackgroundFit.contain => BoxFit.contain,
+                            VersePageBackgroundFit.fill => BoxFit.fill,
+                            VersePageBackgroundFit.none => BoxFit.none,
+                          },
+                        ),
+                ),
+              ),
+            ),
+          content,
+          if (pn != null) _buildPageNumberOverlay(context, pn),
+        ],
+      );
+    }
+
     final label = page.semanticsLabel?.trim();
     if (label == null || label.isEmpty) return content;
     return Semantics(label: label, child: content);
   }
 
+  Widget _buildPageNumberOverlay(BuildContext context, VersePageNumber pn) {
+    final safe = MediaQuery.paddingOf(context);
+    final pad = EdgeInsets.only(left: 16 + safe.left, right: 16 + safe.right, bottom: 12 + safe.bottom);
+
+    final alignment = switch (pn.position) {
+      VersePageNumberPosition.bottomLeft => Alignment.bottomLeft,
+      VersePageNumberPosition.bottomCenter => Alignment.bottomCenter,
+      VersePageNumberPosition.bottomRight => Alignment.bottomRight,
+    };
+
+    return IgnorePointer(
+      child: Align(
+        alignment: alignment,
+        child: Padding(
+          padding: pad,
+          child: Text(
+            pn.formatValue(),
+            style: pageNumberStyle ?? Theme.of(context).textTheme.labelLarge,
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildBlock(BuildContext context, VersePageBlock b) {
     return switch (b) {
-      VerseParagraphBlock(:final text, :final semanticsLabel) =>
+      VerseParagraphBlock(
+        :final text,
+        :final semanticsLabel,
+        :final styleKey,
+        :final textAlign,
+      ) =>
         _maybeSemantics(
           semanticsLabel,
-          Text(
-            text,
-            style: paragraphStyle ?? Theme.of(context).textTheme.bodyLarge,
+          _buildParagraph(
+            context,
+            text: text,
+            styleKey: styleKey,
+            textAlign: textAlign,
           ),
         ),
       VersePassageBlock(
@@ -117,6 +186,40 @@ class VersePageRenderer extends StatelessWidget {
           ? customBlockBuilder!(context, b)
           : const SizedBox.shrink(),
     };
+  }
+
+  Widget _buildParagraph(
+    BuildContext context, {
+    required String text,
+    required String? styleKey,
+    required TextAlign? textAlign,
+  }) {
+    final resolved = styleKey == null
+        ? null
+        : (paragraphStyleResolver?.call(context, styleKey) ??
+            VersePageTheme.of(context).paragraphStyles?.resolve(styleKey));
+
+    final effectiveStyle =
+        resolved?.textStyle ?? paragraphStyle ?? Theme.of(context).textTheme.bodyLarge;
+    final effectiveAlign = textAlign ?? resolved?.textAlign;
+
+    Widget child = Text(
+      text,
+      style: effectiveStyle,
+      textAlign: effectiveAlign,
+    );
+
+    final bg = resolved?.background;
+    final pad = resolved?.padding;
+    if (bg != null || pad != null) {
+      child = Container(
+        decoration: bg,
+        padding: pad,
+        child: child,
+      );
+    }
+
+    return child;
   }
 
   Widget _defaultPageLink(BuildContext context, VersePageLinkBlock link) {

@@ -8,6 +8,38 @@ import 'verse_page_renderer.dart';
 /// Simple page transition presets for [VersePageView].
 enum VersePageTransitionPreset { none, fade, scale, fadeAndScale }
 
+enum VerseChromeAction {
+  prevPage,
+  nextPage,
+  openSearch,
+  openBookmarks,
+  addBookmark,
+  playAudio,
+  stopAudio,
+  togglePlayer,
+}
+
+typedef VerseChromeActionCallback = void Function(
+  VerseChromeAction action, {
+  required String pageId,
+  required int pageIndex,
+});
+
+typedef VersePageChromeBuilder = Widget Function(
+  BuildContext context, {
+  required VersePage page,
+  required int pageIndex,
+  required int pageCount,
+  required VerseChromeActionCallback onAction,
+});
+
+typedef VersePageTransitionBuilder = Widget Function(
+  BuildContext context, {
+  required Widget child,
+  required int index,
+  required double page,
+});
+
 /// Page-level reader with swipe navigation and optional in-page transitions.
 class VersePageView extends StatefulWidget {
   const VersePageView({
@@ -16,9 +48,12 @@ class VersePageView extends StatefulWidget {
     this.initialPage = 0,
     this.onPageChanged,
     this.transitionPreset = VersePageTransitionPreset.none,
+    this.transitionBuilder,
     this.viewportFraction = 1.0,
     this.physics,
     this.rendererBuilder,
+    this.chromeBuilder,
+    this.onChromeAction,
     this.highlightQuery,
     this.highlightStyle,
     this.highlightCaseSensitive = false,
@@ -30,11 +65,18 @@ class VersePageView extends StatefulWidget {
   final ValueChanged<int>? onPageChanged;
 
   final VersePageTransitionPreset transitionPreset;
+  final VersePageTransitionBuilder? transitionBuilder;
   final double viewportFraction;
   final ScrollPhysics? physics;
 
   /// Override how each page is rendered. Defaults to [VersePageRenderer].
   final Widget Function(BuildContext context, VersePage page)? rendererBuilder;
+
+  /// Optional page chrome overlay (controls, toolbars, etc).
+  final VersePageChromeBuilder? chromeBuilder;
+
+  /// Called when chrome triggers an action.
+  final VerseChromeActionCallback? onChromeAction;
 
   final String? highlightQuery;
   final TextStyle? highlightStyle;
@@ -69,12 +111,8 @@ class _VersePageViewState extends State<VersePageView> {
       itemCount: widget.pages.length,
       itemBuilder: (context, index) {
         final page = widget.pages[index];
-        final child =
+        final baseChild =
             (widget.rendererBuilder ?? _defaultRendererBuilder)(context, page);
-
-        if (widget.transitionPreset == VersePageTransitionPreset.none) {
-          return child;
-        }
 
         return AnimatedBuilder(
           animation: _controller,
@@ -82,7 +120,67 @@ class _VersePageViewState extends State<VersePageView> {
             final pageValue = _controller.hasClients && _controller.position.haveDimensions
                 ? (_controller.page ?? _controller.initialPage.toDouble())
                 : _controller.initialPage.toDouble();
-            final delta = (pageValue - index).abs().clamp(0.0, 1.0);
+
+            final offset = (pageValue - index).clamp(-1.0, 1.0);
+            final isVisible = offset.abs() < 0.5;
+
+            Widget child = baseChild;
+
+            final overlays = page.overlays;
+            final hasOverlays = overlays.isNotEmpty;
+            final hasChrome = widget.chromeBuilder != null;
+            if (hasOverlays || hasChrome) {
+              child = Stack(
+                fit: StackFit.passthrough,
+                children: [
+                  if (hasOverlays)
+                    for (final o in overlays)
+                      Positioned.fill(
+                        child: Listener(
+                          behavior: o.hitTestBehavior,
+                          child: o.builder(
+                            context,
+                            page,
+                            VersePageOverlayLifecycle(
+                              isVisible: isVisible,
+                              pageIndex: index,
+                              pageOffset: offset,
+                            ),
+                          ),
+                        ),
+                      ),
+                  child,
+                  if (hasChrome)
+                    widget.chromeBuilder!(
+                      context,
+                      page: page,
+                      pageIndex: index,
+                      pageCount: widget.pages.length,
+                      onAction: (action, {required pageId, required pageIndex}) =>
+                          widget.onChromeAction?.call(
+                        action,
+                        pageId: pageId,
+                        pageIndex: pageIndex,
+                      ),
+                    ),
+                ],
+              );
+            }
+
+            if (widget.transitionBuilder != null) {
+              return widget.transitionBuilder!(
+                context,
+                child: child,
+                index: index,
+                page: pageValue,
+              );
+            }
+
+            if (widget.transitionPreset == VersePageTransitionPreset.none) {
+              return child;
+            }
+
+            final delta = offset.abs().clamp(0.0, 1.0);
             final t = 1.0 - delta; // 1 when focused, 0 when fully offscreen
 
             var opacity = 1.0;

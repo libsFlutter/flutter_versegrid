@@ -4,6 +4,7 @@ export 'src/models/verse_page.dart';
 export 'src/models/verse_page_block.dart';
 export 'src/theme/verse_grid_color_palette.dart';
 export 'src/theme/verse_grid_theme.dart';
+export 'src/theme/verse_page_theme.dart';
 export 'src/utils/group_consecutive.dart';
 export 'src/widgets/verse_passage.dart';
 export 'src/widgets/highlighted_text.dart';

@@ -1,4 +1,5 @@
 import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 
 /// Base class for page-level blocks rendered by [VersePageRenderer].
 @immutable
@@ -11,10 +12,20 @@ class VerseParagraphBlock extends VersePageBlock {
   const VerseParagraphBlock({
     required this.text,
     this.semanticsLabel,
+    this.styleKey,
+    this.textAlign,
   });
 
   final String text;
   final String? semanticsLabel;
+
+  /// Optional host-defined style key (e.g. `body`, `quote`, `title`).
+  ///
+  /// Resolved by [VersePageRenderer] via theme registry or resolver callback.
+  final String? styleKey;
+
+  /// Optional explicit alignment override for this paragraph.
+  final TextAlign? textAlign;
 }
 
 /// A verse passage block (primary + optional secondary).
