@@ -12,12 +12,7 @@ class VersegridGalleryApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'flutter_versegrid',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        extensions: const [
-          VerseGridTheme(),
-        ],
-      ),
+      theme: VerseGridColorPalette.lightTheme(),
       home: const _GalleryPage(),
     );
   }
