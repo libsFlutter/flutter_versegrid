@@ -1,16 +1,11 @@
 # flutter_versegrid
 
-A new Flutter plugin project.
+Reusable Flutter widgets for verse / shloka reading flows:
 
-## Getting Started
+- **`VersePassage`** — primary + optional translation text with tablet row or column layouts.
+- **`VerseRangeChipStrip`** + **`groupConsecutiveByPosition`** — navigation chips for consecutive verse positions (e.g. Bhagavad Gita contents).
+- **`VerseGridTheme`** — optional `ThemeExtension` for gutters and default font sizes.
 
-This project is a starting point for a Flutter
-[plug-in package](https://flutter.dev/to/develop-plugins),
-a specialized package that includes platform-specific implementation code for
-Android and/or iOS.
+This package is plain Dart/UI only (no platform plugins).
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-
-# flutter_versegrid
+See `example/` for a minimal gallery.
