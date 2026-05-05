@@ -2,7 +2,7 @@
 
 > Version: 1.0  
 > Status: APPROVED  
-> Last Updated: 2026-05-05  
+> Last Updated: 2026-05-06  
 > Requirements: [01-requirements.md](./01-requirements.md)
 
 ## Overview
@@ -40,29 +40,19 @@ Export the library from `lib/flutter_versegrid.dart`.
 | `example/` | `theme:` uses `VerseGridColorPalette.lightTheme()` |
 | Tests | Assert hex values + extension registration |
 
-## Legacy Additions - VerseGridTheme Details
-> Added by /legacy on 2026-05-05
+## VerseGridTheme (typography / rhythm)
 
-- **VerseGridTheme**: Реализован как `ThemeExtension<VerseGridTheme>`.
-- **Параметры разметки**:
-  - `verseNumberColumnWidth` (дефолт: 40): Ширина боковой колонки для номеров стихов.
-  - `rowVerticalPadding` (дефолт: 12): Вертикальный отступ для строчного макета.
-  - `columnVerticalPadding` (дефолт: 9): Вертикальный отступ для компактного макета в колонку.
-  - `gapOriginalToTranslation` (дефолт: 16): Расстояние между оригиналом и переводом в строчном макете.
-  - `gapOriginalToTranslationCompact` (дефолт: 8): Расстояние между оригиналом и переводом в компактном макете.
-- **Шрифты**:
-  - `defaultOriginalFontSize` (дефолт: 16)
-  - `defaultTranslationFontSize` (дефолт: 15)
-  - `defaultVerseNumberFontSize` (дефолт: 12)
-- **Методы**:
-  - `of(context)`: Статический метод для получения темы из контекста.
-  - `copyWith`: Поддержка частичного обновления свойств.
-  - `lerp`: Плавная интерполяция между состояниями темы.
+`VerseGridTheme` is registered alongside this palette’s `lightTheme()` for convenience, but **font sizes, gutters, and passage layout semantics** are specified in the dedicated typography SDD:
+
+→ **[`../sdd-typographics/02-specifications.md`](../sdd-typographics/02-specifications.md)**
+
+Do not duplicate parameter tables here—keep color-palette docs focused on hex → `ColorScheme` mapping.
 
 ## Testing Strategy
-...
+
 - Unit test: each `Color` equals `Color(0xFF……)`.
-- Unit test: `lightTheme().extensions[VerseGridTheme]` non-null.
+- Unit test: `lightTheme().extensions[VerseGridTheme]` is registered (extension present alongside palette theme).
+- Passage-specific typography tests (optional): see [`../sdd-typographics/02-specifications.md`](../sdd-typographics/02-specifications.md).
 
 ## Migration / Rollout
 

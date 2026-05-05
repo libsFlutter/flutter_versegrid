@@ -28,6 +28,7 @@ APPROVED (implemented in-repo without formal approval gate)
 
 - Palette source: PDF «Цветовая палитра — HRISHIKESH SWAMI» (hex rows preserved in requirements).
 - Default theme exposed as [VerseGridColorPalette.lightTheme] for package consumers and example app.
+- **Typography / `VerseGridTheme` field tables**: canonical SDD is [`../sdd-typographics/`](../sdd-typographics/README.md) (split from this flow on 2026-05-06).
 
 ## Next Actions
 

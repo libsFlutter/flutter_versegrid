@@ -1,19 +1,19 @@
 # flutter_versegrid
 
-Shared **Flutter UI** for verse / shloka readers: passage layout (original + translation), navigation chips for verse ranges, and optional theme tokens. **No native plugins** — pure Dart + Material.
+Общие **Flutter UI** компоненты для приложений чтения стихов и шлок: разметка пассажей (оригинал + перевод), навигационные чипы для диапазонов стихов и токены оформления. **Без нативных плагинов** — чистый Dart + Material.
 
 **SDK:** Dart ^3.11.5 · Flutter >=3.3.0
 
 ---
 
-## Install
+## Установка
 
-Add a path or pub dependency:
+Добавьте зависимость через путь или pub:
 
 ```yaml
 dependencies:
   flutter_versegrid:
-    path: ../flutter_versegrid  # or ^0.1.0 when published
+    path: ../flutter_versegrid  # или ^0.1.0 после публикации
 ```
 
 ```dart
@@ -22,56 +22,56 @@ import 'package:flutter_versegrid/flutter_versegrid.dart';
 
 ---
 
-## Widgets
+## Виджеты
 
 ### `VersePassage`
 
-Displays a **primary** text line (e.g. Sanskrit, transliteration, or prose) and an optional **secondary** line (translation).
+Отображает основную строку текста (**primary**, например: санскрит, транслитерация) и опциональную второстепенную строку (**secondary**, перевод).
 
-| Parameter | Role |
+| Параметр | Роль |
 |-----------|------|
-| `primary` / `secondary` | Body copy |
-| `verseNumber` | Shown in side column when using `tabletRow` |
-| `layout` | `tabletRow` · `columnCenter` · `columnStretch` |
-| `primaryStyle` / `secondaryStyle` / `verseNumberStyle` | Override typography (falls back to `Theme.textTheme` + sizes from `VerseGridTheme`) |
-| `textScaleFactor` | Scales resolved font sizes |
-| `primaryTextAlign` / `secondaryTextAlign` | Per-line alignment |
+| `primary` / `secondary` | Текст контента |
+| `verseNumber` | Номер стиха, отображается в боковой колонке при использовании `tabletRow` |
+| `layout` | Режимы разметки: `tabletRow` (планшет), `columnCenter` (центр), `columnStretch` (по ширине) |
+| `primaryStyle` / `secondaryStyle` / `verseNumberStyle` | Переопределение типографики (по умолчанию используется `Theme.textTheme` + размеры из `VerseGridTheme`) |
+| `textScaleFactor` | Масштабирует итоговые размеры шрифтов |
+| `primaryTextAlign` / `secondaryTextAlign` | Выравнивание для каждой строки |
 
-Host apps keep full control of fonts (e.g. Murari, PT Sans, Devanagari stacks).
+Приложения сохраняют полный контроль над шрифтами (например, Murari, PT Sans, шрифты Devanagari).
 
 ### `VerseRangeChipStrip<T>`
 
-Horizontal **`Wrap`** of chips built from `List<VerseRange<T>>`. You supply **`chipBuilder`** so colors and chip widgets stay app-specific (`ChoiceChip`, M3 tokens, etc.).
+Горизонтальная лента чипов (**`Wrap`**), построенная на основе `List<VerseRange<T>>`. Вы передаете **`chipBuilder`**, поэтому цвета и типы чипов остаются на стороне приложения (`ChoiceChip`, токены M3 и т.д.).
 
-If `VerseRange.semanticsLabel` is non-empty, each chip is wrapped in **`Semantics`** (`button: true`) for screen readers.
+Если задан `VerseRange.semanticsLabel`, каждый чип оборачивается в **`Semantics`** (`button: true`) для экранных дикторов.
 
 ---
 
-## Models & grouping
+## Модели и группировка
 
 ### `VerseRange<T>`
 
-- **`items`** — slokas / segments in one chip  
-- **`label`** — visible chip text (e.g. `12` or `4-6`)  
-- **`semanticsLabel`** — optional a11y label (e.g. `Chapter 3, verses 4-6`)  
-- **`representative`** — usually `items.first` for navigation  
-- **`copyWith`** / **`clearSemanticsLabel`**
+- **`items`** — список элементов (шлок) в одном чипе.
+- **`label`** — видимый текст чипа (например, `12` или `4-6`).
+- **`semanticsLabel`** — опциональная метка доступности (например, `Глава 3, стихи 4-6`).
+- **`representative`** — обычно `items.first` для навигации.
+- **`copyWith`** / **`clearSemanticsLabel`**.
 
 ### `groupConsecutiveByPosition`
 
-Sorts by `position(item)` and merges runs where `position == previous + 1`. Used for Bhagavad Gita–style ordered verses.
+Сортирует элементы по `position(item)` и объединяет их в группы, где `position == previous + 1`. Используется для последовательных стихов (как в Бхагавад-гите).
 
 ### `groupConsecutiveRuns`
 
-General form: sort with a **`Comparator`**, merge when **`belongsWithPrevious(prev, curr)`** is true. Use for non–integer+1 editorial rules.
+Общая форма: сортировка через **`Comparator`**, объединение, когда **`belongsWithPrevious(prev, curr)`** истинно. Используется для нестандартных правил редакторской группировки.
 
 ---
 
-## Theming
+## Тематизация
 
 ### `VerseGridTheme` (`ThemeExtension`)
 
-Register on `ThemeData.extensions`:
+Регистрируется в `ThemeData.extensions`:
 
 ```dart
 ThemeData(
@@ -86,29 +86,29 @@ ThemeData(
 );
 ```
 
-Read defaults: `VerseGridTheme.of(context)`.
+Чтение значений: `VerseGridTheme.of(context)`.
 
-### `VerseGridColorPalette` (optional)
+### `VerseGridColorPalette` (опционально)
 
-Reference palette + **`lightColorScheme`** / **`lightTheme`** helper — useful for demos or apps that want a ready-made green/gold scheme; production apps often wire their own `ColorScheme`.
+Справочная палитра + вспомогательные методы **`lightColorScheme`** / **`lightTheme`**. Полезно для демо или приложений, которым нужна готовая зелено-золотая схема оформления.
 
 ---
 
-## Usage snippets
+## Примеры использования
 
-**Passage (centered, with translation):**
+**Пассаж (по центру, с переводом):**
 
 ```dart
 VersePassage(
   layout: VersePassageLayout.columnCenter,
   primary: 'jaśomatī-nandana braja-baro nāgara',
-  secondary: 'The son of Yaśodā…',
+  secondary: 'Сын Яшоды…',
   primaryStyle: Theme.of(context).textTheme.titleMedium,
   secondaryStyle: Theme.of(context).textTheme.bodyMedium,
 );
 ```
 
-**Chips after grouping:**
+**Чипы после группировки:**
 
 ```dart
 final ranges = groupConsecutiveByPosition<Sloka>(
@@ -116,7 +116,7 @@ final ranges = groupConsecutiveByPosition<Sloka>(
   position: (s) => s.position,
   buildLabel: (g) => g.length == 1 ? '${g.single.position}' : '${g.first.position}-${g.last.position}',
 ).map((r) => r.copyWith(
-      semanticsLabel: 'Chapter $chapterPos, verses ${r.label}',
+      semanticsLabel: 'Глава $chapterPos, стихи ${r.label}',
     ))
     .toList();
 
@@ -134,40 +134,21 @@ VerseRangeChipStrip<Sloka>(
 
 ---
 
-## Cookbook integration
+## Структура репозитория
 
-For XML/book pipelines that expose styled paragraphs, consecutive pairs with:
-
-- `styleName == 'verse_original'`
-- followed by `styleName == 'verse_translation'`
-
-can be merged into a single `VersePassage` in the host app (see **Cookbook**’s `CookbookVerseParagraphStyles` + `PageContent` in this monorepo).
-
----
-
-## Example
-
-Run the bundled gallery:
-
-```bash
-cd example && flutter run
-```
-
----
-
-## Repository layout
-
-| Path | Contents |
+| Путь | Содержимое |
 |------|----------|
-| `lib/flutter_versegrid.dart` | Barrel export |
-| `lib/src/widgets/` | `VersePassage`, `VerseRangeChipStrip` |
-| `lib/src/utils/group_consecutive.dart` | Range grouping |
-| `lib/src/theme/` | `VerseGridTheme`, `VerseGridColorPalette` |
-| `example/` | Minimal demo |
-| `flows/vdd-verse-grid/` | Product / UX notes (draft) |
+| `lib/flutter_versegrid.dart` | Основной экспорт библиотеки |
+| `lib/src/widgets/` | Виджеты `VersePassage`, `VerseRangeChipStrip` |
+| `lib/src/utils/group_consecutive.dart` | Логика группировки диапазонов |
+| `lib/src/theme/` | Тема `VerseGridTheme`, палитра `VerseGridColorPalette` |
+| `example/` | Минимальное демо-приложение |
+| `flows/sdd-typographics/` | SDD: типографика и ритм абзацев (`VerseGridTheme`, `VersePassage`) |
+| `flows/sdd-color-palette/` | SDD: палитра HRISHIKESH → `ColorScheme` |
+| `flows/` | Прочая документация SDD/VDD/PDD |
 
 ---
 
-## License
+## Лицензия
 
-See `LICENSE` in the package root.
+См. файл `LICENSE` в корне пакета.
