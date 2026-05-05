@@ -28,4 +28,26 @@ void main() {
     expect(r.contains((i) => i == 2), isTrue);
     expect(r.contains((i) => i == 3), isFalse);
   });
+
+  test('VerseRange.copyWith merges semantics', () {
+    const r = VerseRange<int>(items: [1], label: '1');
+    final r2 = r.copyWith(semanticsLabel: 'Chapter 2, verse 1');
+    expect(r2.semanticsLabel, 'Chapter 2, verse 1');
+    expect(r2.label, '1');
+    final r3 = r2.copyWith(clearSemanticsLabel: true);
+    expect(r3.semanticsLabel, isNull);
+  });
+
+  test('groupConsecutiveRuns uses custom adjacency', () {
+    final items = ['a', 'bb', 'ccc', 'dddd'];
+    final ranges = groupConsecutiveRuns<String>(
+      items,
+      sort: (a, b) => a.length.compareTo(b.length),
+      belongsWithPrevious: (prev, curr) =>
+          curr.length == prev.length + 1,
+      buildLabel: (g) => g.join('|'),
+    );
+    expect(ranges.length, 1);
+    expect(ranges.single.items.join(','), 'a,bb,ccc,dddd');
+  });
 }

@@ -5,6 +5,9 @@ import '../models/verse_range.dart';
 /// Chip strip for verse range navigation (contents / master pane).
 ///
 /// Styling is delegated to [chipBuilder] so host apps keep palette authority.
+///
+/// When [VerseRange.semanticsLabel] is set, each chip is wrapped in
+/// [Semantics] with `button: true`.
 class VerseRangeChipStrip<T> extends StatelessWidget {
   const VerseRangeChipStrip({
     super.key,
@@ -46,14 +49,27 @@ class VerseRangeChipStrip<T> extends StatelessWidget {
         runSpacing: runSpacing,
         children: [
           for (final range in ranges)
-            chipBuilder(
-              context,
+            _maybeSemantics(
               range,
-              isRangeSelected(range),
-              () => onRangeTap(range),
+              chipBuilder(
+                context,
+                range,
+                isRangeSelected(range),
+                () => onRangeTap(range),
+              ),
             ),
         ],
       ),
+    );
+  }
+
+  Widget _maybeSemantics(VerseRange<T> range, Widget chip) {
+    final label = range.semanticsLabel?.trim();
+    if (label == null || label.isEmpty) return chip;
+    return Semantics(
+      label: label,
+      button: true,
+      child: chip,
     );
   }
 }
