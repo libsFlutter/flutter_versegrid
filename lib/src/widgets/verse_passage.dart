@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../theme/verse_grid_theme.dart';
+import 'highlighted_text.dart';
 
 /// Layout strategy for [VersePassage].
 enum VersePassageLayout {
@@ -31,6 +32,9 @@ class VersePassage extends StatelessWidget {
     this.verseNumberStyle,
     this.primaryTextAlign,
     this.secondaryTextAlign,
+    this.highlightQuery,
+    this.highlightStyle,
+    this.highlightCaseSensitive = false,
   });
 
   /// Main text (e.g. Sanskrit, transliteration, or translation prose).
@@ -53,6 +57,14 @@ class VersePassage extends StatelessWidget {
 
   final TextAlign? primaryTextAlign;
   final TextAlign? secondaryTextAlign;
+
+  /// Optional search term to highlight inside [primary] and [secondary].
+  final String? highlightQuery;
+
+  /// Optional style override for the highlighted runs.
+  final TextStyle? highlightStyle;
+
+  final bool highlightCaseSensitive;
 
   @override
   Widget build(BuildContext context) {
@@ -126,17 +138,17 @@ class VersePassage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    Text(
+                    _maybeHighlighted(
                       primary,
-                      textAlign: primaryTextAlign ?? TextAlign.center,
                       style: scaledPrimary,
+                      textAlign: primaryTextAlign ?? TextAlign.center,
                     ),
                     if (showSecondary) ...[
                       SizedBox(height: vg.gapOriginalToTranslation),
-                      Text(
+                      _maybeHighlighted(
                         secondaryTrimmed,
-                        textAlign: secondaryTextAlign ?? TextAlign.center,
                         style: scaledSecondary,
+                        textAlign: secondaryTextAlign ?? TextAlign.center,
                       ),
                     ],
                   ],
@@ -154,17 +166,17 @@ class VersePassage extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Text(
+              _maybeHighlighted(
                 primary,
-                textAlign: primaryTextAlign ?? TextAlign.center,
                 style: scaledPrimary,
+                textAlign: primaryTextAlign ?? TextAlign.center,
               ),
               if (showSecondary) ...[
                 SizedBox(height: vg.gapOriginalToTranslationCompact),
-                Text(
+                _maybeHighlighted(
                   secondaryTrimmed,
-                  textAlign: secondaryTextAlign ?? TextAlign.center,
                   style: scaledSecondary,
+                  textAlign: secondaryTextAlign ?? TextAlign.center,
                 ),
               ],
             ],
@@ -175,21 +187,39 @@ class VersePassage extends StatelessWidget {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text(
+            _maybeHighlighted(
               primary,
-              textAlign: primaryTextAlign ?? TextAlign.start,
               style: scaledPrimary,
+              textAlign: primaryTextAlign ?? TextAlign.start,
             ),
             if (showSecondary) ...[
               SizedBox(height: vg.gapOriginalToTranslationCompact),
-              Text(
+              _maybeHighlighted(
                 secondaryTrimmed,
-                textAlign: secondaryTextAlign ?? TextAlign.start,
                 style: scaledSecondary,
+                textAlign: secondaryTextAlign ?? TextAlign.start,
               ),
             ],
           ],
         );
     }
+  }
+
+  Widget _maybeHighlighted(
+    String text, {
+    required TextStyle style,
+    required TextAlign textAlign,
+  }) {
+    final q = highlightQuery?.trim();
+    if (q == null || q.isEmpty) {
+      return Text(text, textAlign: textAlign, style: style);
+    }
+    return HighlightedText(
+      text: text,
+      query: q,
+      style: style,
+      highlightStyle: highlightStyle,
+      caseSensitive: highlightCaseSensitive,
+    );
   }
 }

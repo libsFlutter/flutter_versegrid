@@ -89,6 +89,10 @@ class _GalleryPageState extends State<_GalleryPage> {
   int _selectedVerseNumber = _demoVerses.first.number;
   final Set<int> _bookmarkedVerseNumbers = {1, 3};
   bool _showRussianTranslation = true;
+  bool _showReaderDemo = false;
+  String _highlightQuery = 'yoga';
+  late final TextEditingController _highlightController =
+      TextEditingController(text: _highlightQuery);
 
   _DemoVerse get _selectedVerse => _demoVerses.firstWhere(
         (v) => v.number == _selectedVerseNumber,
@@ -97,6 +101,68 @@ class _GalleryPageState extends State<_GalleryPage> {
 
   String get _translation =>
       _showRussianTranslation ? _selectedVerse.translationRu : _selectedVerse.translationEn;
+
+  List<VersePage> get _demoPages {
+    final v1 = _demoVerses[0];
+    final v2 = _demoVerses[1];
+    final v3 = _demoVerses[2];
+
+    return [
+      VersePage(
+        id: 'p1',
+        semanticsLabel: 'Demo page 1',
+        blocks: [
+          const VerseParagraphBlock(
+            text:
+                'VersePageView demo: swipe horizontally. This page includes paragraphs, passages, and a page link.',
+          ),
+          VersePassageBlock(
+            primary: v1.transliteration,
+            secondary: v1.translationEn,
+            verseNumber: v1.number,
+            semanticsLabel: 'Verse ${v1.number}',
+          ),
+          const VersePageLinkBlock(
+            targetPageId: 'p3',
+            label: 'Jump to page 3 (link block)',
+          ),
+        ],
+      ),
+      VersePage(
+        id: 'p2',
+        semanticsLabel: 'Demo page 2',
+        blocks: [
+          const VerseParagraphBlock(
+            text:
+                'Try changing the highlight query below (default is "yoga").',
+          ),
+          VersePassageBlock(
+            primary: v2.translationEn,
+            secondary: '…such equanimity is called yoga.',
+            verseNumber: v2.number,
+            semanticsLabel: 'Verse ${v2.number}',
+          ),
+        ],
+      ),
+      VersePage(
+        id: 'p3',
+        semanticsLabel: 'Demo page 3',
+        blocks: [
+          const VerseParagraphBlock(
+            text:
+                'This page demonstrates a custom block. Host apps can render arbitrary payloads.',
+          ),
+          VerseCustomBlock<String>('Custom payload: "${v3.translationEn}"'),
+        ],
+      ),
+    ];
+  }
+
+  @override
+  void dispose() {
+    _highlightController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -107,6 +173,130 @@ class _GalleryPageState extends State<_GalleryPage> {
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
+          Text(
+            'Page-level reader (VersePageView)',
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Демо “страница из блоков” + свайпы + transitions + подсветка поиска.',
+            style: theme.textTheme.bodyMedium?.copyWith(
+              color: theme.colorScheme.onSurface.withValues(alpha: 0.72),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              Expanded(
+                child: SwitchListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: const Text('Показать reader demo'),
+                  value: _showReaderDemo,
+                  onChanged: (v) => setState(() => _showReaderDemo = v),
+                ),
+              ),
+              const SizedBox(width: 12),
+              DropdownButton<VersePageTransitionPreset>(
+                value: VersePageTransitionPreset.fadeAndScale,
+                items: const [
+                  DropdownMenuItem(
+                    value: VersePageTransitionPreset.none,
+                    child: Text('none'),
+                  ),
+                  DropdownMenuItem(
+                    value: VersePageTransitionPreset.fade,
+                    child: Text('fade'),
+                  ),
+                  DropdownMenuItem(
+                    value: VersePageTransitionPreset.scale,
+                    child: Text('scale'),
+                  ),
+                  DropdownMenuItem(
+                    value: VersePageTransitionPreset.fadeAndScale,
+                    child: Text('fade+scale'),
+                  ),
+                ],
+                onChanged: null, // fixed in demo to keep state simple
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          TextField(
+            decoration: const InputDecoration(
+              labelText: 'Highlight query',
+              hintText: 'e.g. yoga',
+              border: OutlineInputBorder(),
+            ),
+            controller: _highlightController,
+            onChanged: (v) => setState(() => _highlightQuery = v),
+          ),
+          const SizedBox(height: 12),
+          if (_showReaderDemo)
+            SizedBox(
+              height: 320,
+              child: Card(
+                elevation: 0,
+                clipBehavior: Clip.antiAlias,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+                  ),
+                ),
+                child: VersePageView(
+                  pages: _demoPages,
+                  transitionPreset: VersePageTransitionPreset.fadeAndScale,
+                  highlightQuery: _highlightQuery,
+                  onPageLinkTap: (targetId) {
+                    final idx = _demoPages.indexWhere((p) => p.id == targetId);
+                    if (idx >= 0) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Link tapped → $targetId (index $idx)')),
+                      );
+                    }
+                  },
+                  rendererBuilder: (context, page) {
+                    return VersePageRenderer(
+                      page: page,
+                      highlightQuery: _highlightQuery,
+                      highlightStyle: theme.textTheme.bodyLarge?.copyWith(
+                        backgroundColor: theme.colorScheme.tertiaryContainer,
+                      ),
+                      onPageLinkTap: (targetId) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Link tapped → $targetId')),
+                        );
+                      },
+                      customBlockBuilder: (context, block) {
+                        final payload = block.payload;
+                        return Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.35),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(color: theme.colorScheme.outlineVariant),
+                          ),
+                          child: Text(
+                            payload is String ? payload : payload.toString(),
+                            style: theme.textTheme.bodyMedium,
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            )
+          else
+            Text(
+              'Включи переключатель выше, чтобы увидеть PageView-ридер.',
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: theme.colorScheme.onSurface.withValues(alpha: 0.6),
+              ),
+            ),
+          const SizedBox(height: 28),
           Text(
             'Шлоки и переводы',
             style: theme.textTheme.titleLarge?.copyWith(

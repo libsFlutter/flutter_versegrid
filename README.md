@@ -36,8 +36,17 @@ import 'package:flutter_versegrid/flutter_versegrid.dart';
 | `primaryStyle` / `secondaryStyle` / `verseNumberStyle` | Переопределение типографики (по умолчанию используется `Theme.textTheme` + размеры из `VerseGridTheme`) |
 | `textScaleFactor` | Масштабирует итоговые размеры шрифтов |
 | `primaryTextAlign` / `secondaryTextAlign` | Выравнивание для каждой строки |
+| `highlightQuery` | (опционально) строка поиска для подсветки совпадений |
 
 Приложения сохраняют полный контроль над шрифтами (например, Murari, PT Sans, шрифты Devanagari).
+
+### `VersePageView` / `VersePageRenderer`
+
+Page-level компоновка “страница как список блоков” + свайпы между страницами.
+
+- `VersePage` содержит `id` и список блоков `VersePageBlock`
+- `VersePageRenderer` рендерит блоки по порядку (пассажи, параграфы, ссылки на страницы, кастомные блоки)
+- `VersePageView` — `PageView`-ридер с transitions (`none/fade/scale/fadeAndScale`) и callback’ами (`onPageChanged`, `onPageLinkTap`)
 
 ### `VerseRangeChipStrip<T>`
 

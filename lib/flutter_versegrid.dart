@@ -1,8 +1,13 @@
 export 'src/models/verse_range.dart';
 export 'src/models/verse_number_grid_item.dart';
+export 'src/models/verse_page.dart';
+export 'src/models/verse_page_block.dart';
 export 'src/theme/verse_grid_color_palette.dart';
 export 'src/theme/verse_grid_theme.dart';
 export 'src/utils/group_consecutive.dart';
 export 'src/widgets/verse_passage.dart';
+export 'src/widgets/highlighted_text.dart';
 export 'src/widgets/verse_number_grid.dart';
+export 'src/widgets/verse_page_renderer.dart';
+export 'src/widgets/verse_page_view.dart';
 export 'src/widgets/verse_range_chip_strip.dart';
