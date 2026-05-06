@@ -46,6 +46,7 @@ class VersePageView extends StatefulWidget {
     super.key,
     required this.pages,
     this.initialPage = 0,
+    this.controller,
     this.onPageChanged,
     this.transitionPreset = VersePageTransitionPreset.none,
     this.transitionBuilder,
@@ -62,6 +63,7 @@ class VersePageView extends StatefulWidget {
 
   final List<VersePage> pages;
   final int initialPage;
+  final PageController? controller;
   final ValueChanged<int>? onPageChanged;
 
   final VersePageTransitionPreset transitionPreset;
@@ -89,14 +91,18 @@ class VersePageView extends StatefulWidget {
 }
 
 class _VersePageViewState extends State<VersePageView> {
-  late final PageController _controller = PageController(
-    initialPage: widget.initialPage,
-    viewportFraction: widget.viewportFraction,
-  );
+  late final PageController _controller = widget.controller ??
+      PageController(
+        initialPage: widget.initialPage,
+        viewportFraction: widget.viewportFraction,
+      );
+  late final bool _ownsController = widget.controller == null;
 
   @override
   void dispose() {
-    _controller.dispose();
+    if (_ownsController) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 

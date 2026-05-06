@@ -60,13 +60,22 @@ class VersePageRenderer extends StatelessWidget {
     final children = <Widget>[];
     for (final b in page.blocks) {
       children.add(_buildBlock(context, b));
+      final after = _spacingAfterBlock(b);
+      if (after != null && after > 0) {
+        children.add(SizedBox(height: after));
+      } else {
+        children.add(SizedBox(height: blockSpacing));
+      }
+    }
+    if (children.isNotEmpty) {
+      children.removeLast();
     }
 
     Widget content = Padding(
       padding: padding,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: _withSpacing(children, blockSpacing),
+        children: children,
       ),
     );
 
@@ -188,6 +197,15 @@ class VersePageRenderer extends StatelessWidget {
     };
   }
 
+  double? _spacingAfterBlock(VersePageBlock b) {
+    return switch (b) {
+      VerseParagraphBlock(:final spacingAfter) => spacingAfter,
+      VersePassageBlock(:final spacingAfter) => spacingAfter,
+      VersePageLinkBlock(:final spacingAfter) => spacingAfter,
+      VerseCustomBlock<dynamic>(:final spacingAfter) => spacingAfter,
+    };
+  }
+
   Widget _buildParagraph(
     BuildContext context, {
     required String text,
@@ -245,14 +263,6 @@ class VersePageRenderer extends StatelessWidget {
     return Semantics(label: l, child: child);
   }
 
-  List<Widget> _withSpacing(List<Widget> children, double spacing) {
-    if (children.isEmpty) return const [];
-    final out = <Widget>[];
-    for (var i = 0; i < children.length; i++) {
-      if (i > 0) out.add(SizedBox(height: spacing));
-      out.add(children[i]);
-    }
-    return out;
-  }
+  // Kept intentionally: spacing now handled per-block (see `_spacingAfterBlock`).
 }
 

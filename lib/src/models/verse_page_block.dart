@@ -14,6 +14,7 @@ class VerseParagraphBlock extends VersePageBlock {
     this.semanticsLabel,
     this.styleKey,
     this.textAlign,
+    this.spacingAfter,
   });
 
   final String text;
@@ -26,6 +27,9 @@ class VerseParagraphBlock extends VersePageBlock {
 
   /// Optional explicit alignment override for this paragraph.
   final TextAlign? textAlign;
+
+  /// Optional extra vertical spacing after this block.
+  final double? spacingAfter;
 }
 
 /// A verse passage block (primary + optional secondary).
@@ -35,12 +39,14 @@ class VersePassageBlock extends VersePageBlock {
     this.secondary,
     this.verseNumber,
     this.semanticsLabel,
+    this.spacingAfter,
   });
 
   final String primary;
   final String? secondary;
   final int? verseNumber;
   final String? semanticsLabel;
+  final double? spacingAfter;
 }
 
 /// A tappable "link" to another page (host app handles navigation).
@@ -49,18 +55,25 @@ class VersePageLinkBlock extends VersePageBlock {
     required this.targetPageId,
     required this.label,
     this.semanticsLabel,
+    this.spacingAfter,
   });
 
   final String targetPageId;
   final String label;
   final String? semanticsLabel;
+  final double? spacingAfter;
 }
 
 /// Custom host-provided block payload. Renderer receives it via callback.
 class VerseCustomBlock<T> extends VersePageBlock {
-  const VerseCustomBlock(this.payload, {this.semanticsLabel});
+  const VerseCustomBlock(
+    this.payload, {
+    this.semanticsLabel,
+    this.spacingAfter,
+  });
 
   final T payload;
   final String? semanticsLabel;
+  final double? spacingAfter;
 }
 
