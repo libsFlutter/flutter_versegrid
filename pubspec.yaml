@@ -3,7 +3,8 @@ description: >-
   Shared Flutter widgets for verse and shloka presentation (passages,
   translations, range chips).
 version: 0.1.0
-homepage:
+homepage: https://github.com/libsFlutter/flutter_versegrid
+repository: https://github.com/libsFlutter/flutter_versegrid
 
 environment:
   sdk: ^3.11.5
